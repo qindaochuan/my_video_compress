@@ -4,10 +4,10 @@ import 'package:flutter/services.dart';
 
 class MyVideoCompress {
   static const MethodChannel _channel =
-      const MethodChannel('my_video_compress');
+      const MethodChannel('plugins.flutter.io/my_video_compress');
 
-  static Future<String> get platformVersion async {
-    final String version = await _channel.invokeMethod('getPlatformVersion');
-    return version;
+  static Future<String> videoCompress() async {
+    String path = await _channel.invokeMethod("videoCompress");
+    return path;
   }
 }
