@@ -152,7 +152,7 @@ public class MyVideoCompressPlugin implements FlutterPlugin, MethodCallHandler, 
             return;
         }
 
-        if (call.method.equals("pickFile")) {
+        if (call.method.equals("videoCompress")) {
             delegate.videoCompress(call,rawResult);
         } else {
             rawResult.notImplemented();

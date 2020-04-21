@@ -6,6 +6,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
+import com.vincent.videocompressor.VideoCompress;
+
 import java.lang.ref.WeakReference;
 
 import io.flutter.plugin.common.MethodCall;
@@ -19,13 +21,17 @@ public class MyVideoCompressDelegate implements PluginRegistry.ActivityResultLis
 
     private static final int HANDLER_VIDEO_COMPRESS = 1;
 
+    private String srcPath = null;
+
     public MyVideoCompressDelegate(Activity activity) {
         this.activity = activity;
         this.handler = new MyHandler(activity,this);
     }
 
     public void videoCompress(MethodCall call, MethodChannel.Result result){
-        System.out.println("Android call pickFile()");
+        System.out.println("Android call videoCompress(...)");
+        srcPath = call.argument("srcPath");
+        System.out.println("srcPath = " + srcPath);
         this.result = result;
         Message msg = new Message();
         msg.what = HANDLER_VIDEO_COMPRESS;
@@ -59,13 +65,44 @@ public class MyVideoCompressDelegate implements PluginRegistry.ActivityResultLis
 
     public void doVideoCompress(){
         System.out.println("doVideoCompress()");
+        int dot = srcPath.lastIndexOf('.');
+        final String destPath = srcPath.substring(0,dot) + "_compress" + srcPath.substring(dot);
         new Thread()
         {
             @Override
             public void run() {
                 super.run();
                 Looper.prepare();
+                VideoCompress.compressVideoLow(srcPath, destPath, new VideoCompress.CompressListener() {
 
+                    @Override
+                    public void onStart() {
+
+                    }
+
+                    @Override
+                    public void onSuccess() {
+                        Handler thisHandler = new Handler(Looper.getMainLooper());
+                        thisHandler.post(new Runnable()
+                        {
+                            @Override
+                            public void run()
+                            {
+                                result.success(destPath);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFail() {
+
+                    }
+
+                    @Override
+                    public void onProgress(float percent) {
+
+                    }
+                });
                 Looper.loop();
             }
         }.start();
